@@ -9,7 +9,8 @@ enter, splits it by life-cycle stage and by part, and suggests how to reduce it.
 ## Quick start
 
 ```bash
-cd carbon-footprint
+git clone https://github.com/hadaschass/medical-carbon-footprint.git
+cd medical-carbon-footprint
 npm start          # http://localhost:3000  (PORT=8080 npm start to change)
 npm test           # 22 unit + API tests (node:test)
 ```
