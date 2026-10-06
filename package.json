@@ -1,0 +1,15 @@
+{
+  "name": "medical-product-carbon-footprint",
+  "version": "1.0.0",
+  "description": "Interactive cradle-to-grave carbon footprint estimator for medical products (e.g. latex gloves, syringes, gowns).",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

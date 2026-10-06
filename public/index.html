@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Medical Carbon Footprint</title>
+  <meta name="description" content="Estimate the cradle-to-grave carbon footprint of medical products such as latex gloves, syringes and gowns.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-row">
+      <div>
+        <h1>Medical Carbon Footprint</h1>
+        <p class="subtitle">Cradle-to-grave CO<sub>2</sub>e estimate for medical products — materials, manufacturing, packaging, sterilisation, transport, use and disposal.</p>
+      </div>
+      <button type="button" id="theme-toggle" class="ghost" aria-label="Toggle dark mode">Theme</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card search-card" aria-labelledby="search-title">
+      <h2 id="search-title" class="visually-hidden">Find a product</h2>
+      <form id="search-form" class="search-row" autocomplete="off">
+        <div class="field grow combo">
+          <label for="product-input">Medical product name</label>
+          <input id="product-input" type="text" placeholder="e.g. latex glove" maxlength="200"
+                 role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggestions" required>
+          <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+        </div>
+        <div class="field qty">
+          <label for="quantity-input">Quantity</label>
+          <input id="quantity-input" type="number" min="1" step="1" value="1">
+        </div>
+        <button type="submit" class="primary">Calculate</button>
+      </form>
+      <div class="examples" aria-label="Examples">
+        <span class="muted">Try:</span>
+        <button type="button" class="chip" data-example="latex glove">Latex glove</button>
+        <button type="button" class="chip" data-example="nitrile glove">Nitrile glove</button>
+        <button type="button" class="chip" data-example="syringe">Syringe</button>
+        <button type="button" class="chip" data-example="surgical mask">Surgical mask</button>
+        <button type="button" class="chip" data-example="surgical gown">Surgical gown</button>
+        <button type="button" class="chip" data-example="reusable gown">Reusable gown</button>
+      </div>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <div id="workspace" class="workspace" hidden>
+      <section class="card editor" aria-labelledby="editor-title">
+        <h2 id="editor-title">Product details</h2>
+        <p class="muted small">Defaults come from typical catalogue data. Edit anything to match your supplier — results update instantly.</p>
+        <p id="draft-note" class="notice" hidden></p>
+        <form id="editor" novalidate></form>
+      </section>
+
+      <section class="card results" aria-labelledby="results-title" aria-live="polite">
+        <h2 id="results-title">Carbon footprint</h2>
+        <div id="results"></div>
+      </section>
+    </div>
+
+    <section id="compare" class="card" aria-labelledby="compare-title" hidden>
+      <div class="section-head">
+        <h2 id="compare-title">Comparison</h2>
+        <button type="button" id="compare-clear" class="ghost small-btn">Clear all</button>
+      </div>
+      <p class="muted small">Per functional unit (per use for reusable items).</p>
+      <div id="compare-chart"></div>
+    </section>
+
+    <section class="card method" aria-labelledby="method-title">
+      <h2 id="method-title">Method &amp; assumptions</h2>
+      <ul>
+        <li><strong>Scope:</strong> cradle-to-grave, GWP100 in kg CO<sub>2</sub>e, per functional unit (e.g. one glove). Reusable items are shown per use: production, transport and disposal are divided over the number of uses, plus reprocessing per use.</li>
+        <li><strong>Materials:</strong> mass × cradle-to-gate factor. <strong>Manufacturing:</strong> mass × process energy (kWh/kg) × grid intensity of the manufacturing country.</li>
+        <li><strong>Sterilisation:</strong> mass of product + packaging × method factor. <strong>Transport:</strong> tonne-km × mode factor.</li>
+        <li><strong>End of life:</strong> waste-route factor per kg. Biogenic carbon (natural rubber, cotton, paper) is treated as climate-neutral when burned.</li>
+        <li>Factors are indicative secondary data (ICE, PlasticsEurope, DEFRA/DESNZ, IEA and published medical-device LCAs). Results are screening estimates (±30 %) for hotspot analysis and comparison, not for certified claims.</li>
+      </ul>
+    </section>
+  </main>
+
+  <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+  <script src="app.js"></script>
+</body>
+</html>
