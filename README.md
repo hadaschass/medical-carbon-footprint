@@ -12,10 +12,24 @@ enter, splits it by life-cycle stage and by part, and suggests how to reduce it.
 git clone https://github.com/hadaschass/medical-carbon-footprint.git
 cd medical-carbon-footprint
 npm start          # http://localhost:3000  (PORT=8080 npm start to change)
-npm test           # 22 unit + API tests (node:test)
+npm test           # unit, API and static-build tests (node:test)
 ```
 
 Requires Node.js ≥ 18. No third-party dependencies.
+
+### Static version (no server)
+
+`npm run build` writes `docs/index.html`: one self-contained file with the
+calculation engine bundled in. It runs entirely in the browser, so you can
+open it straight from disk or host it on any static host. To publish it on
+GitHub Pages, go to **Settings → Pages**, choose *Deploy from a branch*, and
+pick `main` and the `/docs` folder. Re-run `npm run build` after changing
+anything in `src/` or `public/`; a test fails if the bundle breaks.
+
+`node scripts/build-static.js --fragment out.html` writes the page body only.
+Use it for hosts that supply their own `<html>`/`<head>` and block file
+downloads. In that version the export buttons copy CSV/JSON to the clipboard
+instead of downloading a file.
 
 ## Features
 
@@ -65,6 +79,8 @@ supplier-specific data where you have it.
 
 ```
 server.js                 HTTP server (static UI + JSON API)
+scripts/build-static.js   single-file static build (docs/index.html)
+src/routes.js             API routes shared by the server and the static build
 src/data/factors.js       emission-factor library
 src/data/products.js      reference product library
 src/engine/calculator.js  footprint model + input validation

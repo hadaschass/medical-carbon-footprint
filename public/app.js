@@ -14,6 +14,7 @@
   };
 
   const COMPARE_KEY = 'mcf-compare-v1';
+  const COPY_EXPORT = window.MCF_EXPORT === 'copy';
   const THEME_KEY = 'mcf-theme';
   const MAX_COMPARE = 12;
 
@@ -46,6 +47,16 @@
   }
 
   async function api(path, options = {}) {
+    // The static build bundles the engine and answers requests in-page.
+    if (typeof window.MCF_LOCAL_API === 'function') {
+      const { status, body } = await window.MCF_LOCAL_API(path, options);
+      if (status >= 400) {
+        const err = new Error(body.error || `Request failed (${status})`);
+        err.details = body.details;
+        throw err;
+      }
+      return body;
+    }
     const res = await fetch(path, {
       ...options,
       headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
@@ -532,8 +543,8 @@
       el('ul', { className: 'tips' }, r.recommendations.map((t) => el('li', { text: t }))),
       el('div', { className: 'actions' }, [
         el('button', { type: 'button', className: 'primary', onclick: addToCompare }, 'Add to comparison'),
-        el('button', { type: 'button', className: 'ghost', onclick: downloadCsv }, 'Download CSV'),
-        el('button', { type: 'button', className: 'ghost', onclick: downloadJson }, 'Download JSON'),
+        el('button', { type: 'button', className: 'ghost', onclick: downloadCsv }, COPY_EXPORT ? 'Copy CSV' : 'Download CSV'),
+        el('button', { type: 'button', className: 'ghost', onclick: downloadJson }, COPY_EXPORT ? 'Copy JSON' : 'Download JSON'),
       ]),
     );
   }
@@ -592,7 +603,21 @@
 
   // ---------- export ----------
 
+  // Some hosts (sandboxed embeds) block file downloads; there we copy instead.
+  async function copyText(label, content) {
+    try {
+      await navigator.clipboard.writeText(content);
+      setStatus(`${label} copied to the clipboard.`);
+    } catch {
+      setStatus(`Could not copy ${label} automatically. Your browser blocked clipboard access.`, true);
+    }
+  }
+
   function download(filename, content, type) {
+    if (COPY_EXPORT) {
+      copyText(type === 'text/csv' ? 'CSV' : 'JSON', content);
+      return;
+    }
     const url = URL.createObjectURL(new Blob([content], { type }));
     const a = el('a', { href: url, download: filename });
     document.body.append(a);
@@ -651,5 +676,9 @@
     .then((factors) => { state.factors = factors; })
     .catch((err) => setStatus(`Could not load emission factors: ${err.message}`, true));
   renderCompare();
-  input.focus();
+  // Open on a worked example so the first view shows what the tool does.
+  input.value = 'latex glove';
+  loadProduct('latex-exam-glove')
+    .then(() => setStatus('Showing an example: one latex examination glove. Type any medical product above to estimate it.'))
+    .catch(() => {});
 })();

@@ -1,0 +1,2170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Medical Carbon Footprint</title>
+  <meta name="description" content="Estimate the cradle-to-grave carbon footprint of medical products such as latex gloves, syringes and gowns.">
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIGZpbGw9IiMxYmFmN2EiLz48cGF0aCBkPSJNMTYgN2MtNSA0LTcgOC03IDExYTcgNyAwIDAgMCAxNCAwYzAtMy0yLTctNy0xMXoiIGZpbGw9IiNmZmYiLz48L3N2Zz4K" type="image/svg+xml">
+  <style>
+:root {
+  color-scheme: light;
+  --bg: #f5f5f2;
+  --surface: #fcfcfb;
+  --surface-2: #f0efeb;
+  --border: #dddcd5;
+  --text: #0b0b0b;
+  --text-2: #52514e;
+  --muted: #6b6a66;
+  --accent: #127a55;
+  --accent-ink: #ffffff;
+  --series-1: #2a78d6;
+  --track: #ecebe6;
+  --notice-bg: #fff6df;
+  --notice-border: #eda100;
+  --error: #b42318;
+  --focus: #2a78d6;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #121211;
+    --surface: #1a1a19;
+    --surface-2: #232321;
+    --border: #3a3a37;
+    --text: #ffffff;
+    --text-2: #c3c2b7;
+    --muted: #a3a29a;
+    --accent: #1baf7a;
+    --accent-ink: #0b0b0b;
+    --series-1: #3987e5;
+    --track: #2a2a28;
+    --notice-bg: #33280c;
+    --notice-border: #c98500;
+    --error: #ff8a80;
+    --focus: #6aa8f0;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121211;
+  --surface: #1a1a19;
+  --surface-2: #232321;
+  --border: #3a3a37;
+  --text: #ffffff;
+  --text-2: #c3c2b7;
+  --muted: #a3a29a;
+  --accent: #1baf7a;
+  --accent-ink: #0b0b0b;
+  --series-1: #3987e5;
+  --track: #2a2a28;
+  --notice-bg: #33280c;
+  --notice-border: #c98500;
+  --error: #ff8a80;
+  --focus: #6aa8f0;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+h1 { font-size: 1.6rem; margin: 0; letter-spacing: -0.01em; }
+h2 { font-size: 1.1rem; margin: 0 0 8px; }
+h3 { font-size: 0.95rem; margin: 18px 0 8px; color: var(--text-2); }
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.site-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px 0; margin-bottom: 20px; }
+.header-row { display: flex; gap: 16px; justify-content: space-between; align-items: flex-start; }
+.subtitle { margin: 4px 0 0; color: var(--text-2); max-width: 70ch; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; min-width: 0; }
+
+button { font: inherit; cursor: pointer; border-radius: 8px; }
+.primary { background: var(--accent); color: var(--accent-ink); border: 0; padding: 9px 18px; font-weight: 600; }
+.primary:hover { filter: brightness(1.08); }
+.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); padding: 6px 12px; }
+.ghost:hover { background: var(--surface-2); }
+.small-btn { padding: 4px 10px; font-size: 0.85rem; }
+.icon-btn { background: transparent; border: 1px solid transparent; color: var(--muted); padding: 2px 8px; font-size: 1.1rem; line-height: 1; }
+.icon-btn:hover { color: var(--error); border-color: var(--border); }
+
+input, select {
+  font: inherit; color: var(--text); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 8px; padding: 7px 9px; width: 100%; min-width: 0;
+}
+input[aria-invalid="true"] { border-color: var(--error); }
+label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-2); margin-bottom: 4px; }
+
+.search-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.field.grow { flex: 1 1 260px; }
+.field.qty { flex: 0 0 120px; }
+.combo { position: relative; }
+.suggestions {
+  position: absolute; z-index: 10; left: 0; right: 0; top: 100%; margin: 4px 0 0; padding: 4px;
+  list-style: none; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.12); max-height: 320px; overflow: auto;
+}
+.suggestions li { padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+.suggestions li[aria-selected="true"], .suggestions li:hover { background: var(--surface-2); }
+.suggestions .s-meta { display: block; font-size: 0.78rem; color: var(--muted); }
+.examples { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+.chip { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 999px; padding: 3px 12px; font-size: 0.85rem; }
+.chip:hover { border-color: var(--accent); }
+.status { margin: 10px 0 0; min-height: 1.2em; color: var(--text-2); }
+.status.error { color: var(--error); }
+.notice { background: var(--notice-bg); border-left: 4px solid var(--notice-border); padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; }
+
+.workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.workspace > .card { margin-bottom: 0; }
+.workspace { margin-bottom: 20px; }
+@media (max-width: 900px) { .workspace { grid-template-columns: minmax(0, 1fr); } }
+
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
+@media (max-width: 480px) { .grid-2 { grid-template-columns: minmax(0, 1fr); } }
+.rows { display: flex; flex-direction: column; gap: 8px; }
+.item-row { display: grid; gap: 6px; align-items: end; padding: 8px; background: var(--surface-2); border-radius: 8px; }
+.item-row.component { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr) 80px minmax(0, 1.2fr) auto; }
+.item-row.pack { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.4fr) 80px auto; }
+.item-row.leg { grid-template-columns: minmax(0, 1.4fr) 110px auto; }
+@media (max-width: 600px) {
+  .item-row.component, .item-row.pack { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .item-row.leg { grid-template-columns: minmax(0, 1fr) 100px auto; }
+}
+.add-btn { align-self: flex-start; }
+
+.hero { display: flex; flex-wrap: wrap; gap: 6px 24px; align-items: baseline; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.hero-value { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.hero-unit { color: var(--text-2); }
+.hero-sub { flex-basis: 100%; color: var(--text-2); font-size: 0.92rem; }
+.equivalents { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+@media (max-width: 480px) { .equivalents { grid-template-columns: minmax(0, 1fr); } }
+.tile { background: var(--surface-2); border-radius: 8px; padding: 10px; }
+.tile-value { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tile-label { font-size: 0.8rem; color: var(--text-2); }
+
+.chart-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 18px; }
+.chart-head h3 { margin: 0; }
+.bars { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+.bar-row {
+  display: grid; grid-template-columns: minmax(90px, 150px) minmax(0, 1fr) minmax(70px, auto);
+  gap: 10px; align-items: center; padding: 5px 4px; border-radius: 6px;
+}
+.bar-row:hover, .bar-row:focus-visible { background: var(--surface-2); }
+.bar-label { font-size: 0.85rem; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-track { height: 14px; position: relative; }
+.bar-track::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--border); }
+.bar { height: 100%; background: var(--series-1); border-radius: 0 4px 4px 0; min-width: 0; }
+.bar-row.top .bar-label { color: var(--text); font-weight: 600; }
+.bar-value { font-size: 0.85rem; text-align: right; font-variant-numeric: tabular-nums; color: var(--text); white-space: nowrap; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+th { color: var(--text-2); font-weight: 600; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.table-scroll { overflow-x: auto; }
+
+.tips { margin: 0; padding-left: 20px; }
+.tips li { margin-bottom: 6px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+
+.section-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.compare-row .bar-label { white-space: normal; }
+.method ul { margin: 0; padding-left: 20px; color: var(--text-2); }
+.method li { margin-bottom: 6px; }
+
+.tooltip {
+  position: fixed; z-index: 50; pointer-events: none; max-width: 260px;
+  background: var(--text); color: var(--surface); padding: 6px 10px; border-radius: 6px; font-size: 0.82rem;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.2);
+}
+
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-row">
+      <div>
+        <h1>Medical Carbon Footprint</h1>
+        <p class="subtitle">Cradle-to-grave CO<sub>2</sub>e estimate for medical products — materials, manufacturing, packaging, sterilisation, transport, use and disposal.</p>
+      </div>
+      <button type="button" id="theme-toggle" class="ghost" aria-label="Toggle dark mode">Theme</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card search-card" aria-labelledby="search-title">
+      <h2 id="search-title" class="visually-hidden">Find a product</h2>
+      <form id="search-form" class="search-row" autocomplete="off">
+        <div class="field grow combo">
+          <label for="product-input">Medical product name</label>
+          <input id="product-input" type="text" placeholder="e.g. latex glove" maxlength="200"
+                 role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggestions" required>
+          <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+        </div>
+        <div class="field qty">
+          <label for="quantity-input">Quantity</label>
+          <input id="quantity-input" type="number" min="1" step="1" value="1">
+        </div>
+        <button type="submit" class="primary">Calculate</button>
+      </form>
+      <div class="examples" aria-label="Examples">
+        <span class="muted">Try:</span>
+        <button type="button" class="chip" data-example="latex glove">Latex glove</button>
+        <button type="button" class="chip" data-example="nitrile glove">Nitrile glove</button>
+        <button type="button" class="chip" data-example="syringe">Syringe</button>
+        <button type="button" class="chip" data-example="surgical mask">Surgical mask</button>
+        <button type="button" class="chip" data-example="surgical gown">Surgical gown</button>
+        <button type="button" class="chip" data-example="reusable gown">Reusable gown</button>
+      </div>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <div id="workspace" class="workspace" hidden>
+      <section class="card editor" aria-labelledby="editor-title">
+        <h2 id="editor-title">Product details</h2>
+        <p class="muted small">Defaults come from typical catalogue data. Edit anything to match your supplier — results update instantly.</p>
+        <p id="draft-note" class="notice" hidden></p>
+        <form id="editor" novalidate></form>
+      </section>
+
+      <section class="card results" aria-labelledby="results-title" aria-live="polite">
+        <h2 id="results-title">Carbon footprint</h2>
+        <div id="results"></div>
+      </section>
+    </div>
+
+    <section id="compare" class="card" aria-labelledby="compare-title" hidden>
+      <div class="section-head">
+        <h2 id="compare-title">Comparison</h2>
+        <button type="button" id="compare-clear" class="ghost small-btn">Clear all</button>
+      </div>
+      <p class="muted small">Per functional unit (per use for reusable items).</p>
+      <div id="compare-chart"></div>
+    </section>
+
+    <section class="card method" aria-labelledby="method-title">
+      <h2 id="method-title">Method &amp; assumptions</h2>
+      <ul>
+        <li><strong>Scope:</strong> cradle-to-grave, GWP100 in kg CO<sub>2</sub>e, per functional unit (e.g. one glove). Reusable items are shown per use: production, transport and disposal are divided over the number of uses, plus reprocessing per use.</li>
+        <li><strong>Materials:</strong> mass × cradle-to-gate factor. <strong>Manufacturing:</strong> mass × process energy (kWh/kg) × grid intensity of the manufacturing country.</li>
+        <li><strong>Sterilisation:</strong> mass of product + packaging × method factor. <strong>Transport:</strong> tonne-km × mode factor.</li>
+        <li><strong>End of life:</strong> waste-route factor per kg. Biogenic carbon (natural rubber, cotton, paper) is treated as climate-neutral when burned.</li>
+        <li>Factors are indicative secondary data (ICE, PlasticsEurope, DEFRA/DESNZ, IEA and published medical-device LCAs). Results are screening estimates (±30 %) for hotspot analysis and comparison, not for certified claims.</li>
+      </ul>
+    </section>
+  </main>
+
+  <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+  <script>
+(function () {
+  'use strict';
+  var defs = {
+"src/data/factors.js": function (module, exports, require) {
+'use strict';
+
+/**
+ * Emission factor library.
+ *
+ * All values are indicative screening factors in kg CO2-equivalent (GWP100),
+ * compiled from public secondary sources (ICE database v3, PlasticsEurope
+ * eco-profiles, UK DEFRA/DESNZ conversion factors, IEA grid intensities and
+ * published LCAs of single-use medical devices). They are suitable for
+ * hotspot analysis and comparing options, not for regulatory claims or
+ * EPDs — replace them with supplier-specific data where available.
+ */
+
+// Cradle-to-gate production of the raw material, kg CO2e per kg.
+// `eol` gives end-of-life emissions per kg of discarded material for each
+// waste route. Biogenic carbon (natural rubber, cotton, paper) is treated as
+// climate-neutral on combustion, following the GHG Protocol convention.
+const MATERIALS = {
+  natural_rubber_latex: {
+    name: 'Natural rubber latex (compounded)',
+    factor: 2.4,
+    eol: { incineration: 0.15, landfill: 0.4, recycling: 0.2 },
+  },
+  nitrile_rubber: {
+    name: 'Nitrile butadiene rubber (NBR)',
+    factor: 3.7,
+    eol: { incineration: 2.6, landfill: 0.03, recycling: 0.2 },
+  },
+  pvc: {
+    name: 'PVC (plasticised, medical grade)',
+    factor: 2.6,
+    eol: { incineration: 1.6, landfill: 0.03, recycling: 0.2 },
+  },
+  polypropylene: {
+    name: 'Polypropylene (PP)',
+    factor: 1.95,
+    eol: { incineration: 3.1, landfill: 0.03, recycling: 0.2 },
+  },
+  pp_nonwoven: {
+    name: 'Polypropylene nonwoven (spunbond/meltblown)',
+    factor: 2.2,
+    eol: { incineration: 3.1, landfill: 0.03, recycling: 0.2 },
+  },
+  hdpe: {
+    name: 'High-density polyethylene (HDPE)',
+    factor: 1.9,
+    eol: { incineration: 3.1, landfill: 0.03, recycling: 0.2 },
+  },
+  ldpe: {
+    name: 'Low-density polyethylene (LDPE film)',
+    factor: 2.1,
+    eol: { incineration: 3.1, landfill: 0.03, recycling: 0.2 },
+  },
+  pet: {
+    name: 'Polyethylene terephthalate (PET)',
+    factor: 2.7,
+    eol: { incineration: 2.3, landfill: 0.03, recycling: 0.2 },
+  },
+  polystyrene: {
+    name: 'Polystyrene (PS)',
+    factor: 3.4,
+    eol: { incineration: 3.3, landfill: 0.03, recycling: 0.2 },
+  },
+  polycarbonate: {
+    name: 'Polycarbonate (PC)',
+    factor: 6.0,
+    eol: { incineration: 2.8, landfill: 0.03, recycling: 0.2 },
+  },
+  abs: {
+    name: 'ABS',
+    factor: 3.8,
+    eol: { incineration: 3.1, landfill: 0.03, recycling: 0.2 },
+  },
+  synthetic_rubber: {
+    name: 'Synthetic polyisoprene / butyl rubber',
+    factor: 3.5,
+    eol: { incineration: 3.0, landfill: 0.03, recycling: 0.2 },
+  },
+  polyester_textile: {
+    name: 'Polyester fibre (PET textile)',
+    factor: 3.4,
+    eol: { incineration: 2.3, landfill: 0.03, recycling: 0.2 },
+  },
+  silicone: {
+    name: 'Silicone rubber',
+    factor: 5.5,
+    eol: { incineration: 1.0, landfill: 0.03, recycling: 0.2 },
+  },
+  polyurethane: {
+    name: 'Polyurethane / elastane',
+    factor: 4.3,
+    eol: { incineration: 2.4, landfill: 0.03, recycling: 0.2 },
+  },
+  stainless_steel: {
+    name: 'Stainless steel',
+    factor: 6.15,
+    eol: { incineration: 0.02, landfill: 0.01, recycling: 0.05 },
+  },
+  steel: {
+    name: 'Steel (low alloy / wire)',
+    factor: 2.0,
+    eol: { incineration: 0.02, landfill: 0.01, recycling: 0.05 },
+  },
+  aluminium: {
+    name: 'Aluminium (global mix)',
+    factor: 8.6,
+    eol: { incineration: 0.02, landfill: 0.01, recycling: 0.05 },
+  },
+  glass: {
+    name: 'Glass (borosilicate / soda-lime)',
+    factor: 1.4,
+    eol: { incineration: 0.02, landfill: 0.01, recycling: 0.05 },
+  },
+  cotton: {
+    name: 'Cotton (bleached woven/gauze)',
+    factor: 5.9,
+    eol: { incineration: 0.05, landfill: 0.8, recycling: 0.2 },
+  },
+  paper: {
+    name: 'Medical-grade paper',
+    factor: 1.1,
+    eol: { incineration: 0.05, landfill: 0.9, recycling: 0.1 },
+  },
+  cardboard: {
+    name: 'Corrugated cardboard',
+    factor: 0.9,
+    eol: { incineration: 0.05, landfill: 0.9, recycling: 0.1 },
+  },
+  electronics: {
+    name: 'Electronics (PCB assembly, components)',
+    factor: 60,
+    eol: { incineration: 0.5, landfill: 0.05, recycling: 0.3 },
+  },
+  lithium_battery: {
+    name: 'Lithium-ion battery cell',
+    factor: 12,
+    eol: { incineration: 0.5, landfill: 0.05, recycling: 0.3 },
+  },
+};
+
+// Conversion energy, kWh of electricity-equivalent per kg of processed
+// material. Multiplied by the manufacturing country's grid factor.
+const PROCESSES = {
+  dipping: { name: 'Latex/nitrile dipping, curing & drying', kwhPerKg: 6.0 },
+  injection_molding: { name: 'Injection moulding', kwhPerKg: 3.0 },
+  extrusion: { name: 'Extrusion / film blowing', kwhPerKg: 1.5 },
+  blow_molding: { name: 'Blow moulding', kwhPerKg: 2.5 },
+  nonwoven: { name: 'Nonwoven forming & converting', kwhPerKg: 2.5 },
+  textile: { name: 'Spinning, weaving & finishing', kwhPerKg: 12.0 },
+  metal_forming: { name: 'Metal forming & machining', kwhPerKg: 5.0 },
+  electronics_assembly: { name: 'Electronics assembly', kwhPerKg: 20.0 },
+  converting: { name: 'Cutting, folding & converting', kwhPerKg: 0.8 },
+  assembly: { name: 'Final assembly only', kwhPerKg: 0.3 },
+};
+
+// Electricity grid intensity, kg CO2e per kWh (approx. 2023 averages).
+const GRID = {
+  global: { name: 'Global average', factor: 0.48 },
+  china: { name: 'China', factor: 0.58 },
+  malaysia: { name: 'Malaysia', factor: 0.58 },
+  thailand: { name: 'Thailand', factor: 0.5 },
+  vietnam: { name: 'Vietnam', factor: 0.47 },
+  india: { name: 'India', factor: 0.71 },
+  indonesia: { name: 'Indonesia', factor: 0.68 },
+  israel: { name: 'Israel', factor: 0.53 },
+  usa: { name: 'United States', factor: 0.37 },
+  mexico: { name: 'Mexico', factor: 0.42 },
+  germany: { name: 'Germany', factor: 0.38 },
+  uk: { name: 'United Kingdom', factor: 0.21 },
+  france: { name: 'France', factor: 0.06 },
+  ireland: { name: 'Ireland', factor: 0.33 },
+};
+
+// Sterilisation, kg CO2e per kg of sterilised product (incl. packaging load).
+const STERILIZATION = {
+  none: { name: 'Not sterile', factor: 0 },
+  ethylene_oxide: { name: 'Ethylene oxide (EtO)', factor: 0.6 },
+  gamma: { name: 'Gamma irradiation', factor: 0.15 },
+  ebeam: { name: 'Electron beam', factor: 0.1 },
+  steam: { name: 'Steam autoclave (industrial)', factor: 0.3 },
+};
+
+// Freight, kg CO2e per tonne-km (well-to-wheel).
+const TRANSPORT = {
+  sea: { name: 'Container ship', factor: 0.016 },
+  road: { name: 'Truck (HGV, average laden)', factor: 0.107 },
+  rail: { name: 'Rail freight', factor: 0.028 },
+  air: { name: 'Air freight (long haul)', factor: 0.6 },
+};
+
+const END_OF_LIFE = {
+  incineration: { name: 'Clinical waste incineration' },
+  landfill: { name: 'Landfill' },
+  recycling: { name: 'Recycling (collection & processing)' },
+};
+
+// Handy everyday equivalents for communicating results.
+const EQUIVALENTS = {
+  carKm: { label: 'km driven in an average petrol car', factor: 0.17 },
+  phoneCharges: { label: 'smartphone full charges', factor: 0.0082 },
+  kettleBoils: { label: 'kettle boils (1 L)', factor: 0.025 },
+};
+
+module.exports = {
+  MATERIALS,
+  PROCESSES,
+  GRID,
+  STERILIZATION,
+  TRANSPORT,
+  END_OF_LIFE,
+  EQUIVALENTS,
+};
+
+},
+"src/data/products.js": function (module, exports, require) {
+'use strict';
+
+/**
+ * Library of reference medical products.
+ *
+ * Every product is described per *functional unit* (e.g. "1 glove") with:
+ *   components    product materials: { name, material, massG, process }
+ *   packaging     packaging share allocated to one unit: { name, material, massG }
+ *   country       manufacturing country (key of GRID)
+ *   sterilization key of STERILIZATION
+ *   transport     freight legs from factory to hospital: { mode, km }
+ *   use           { uses, reprocessingKgPerUse, energyKwhPerUse, country }
+ *                 uses > 1 marks a reusable product; its production impacts
+ *                 are amortised over that many uses.
+ *   endOfLife     waste route for the product (key of END_OF_LIFE)
+ *   packagingEndOfLife waste route for packaging
+ *
+ * Masses are typical published/catalogue values; treat them as defaults the
+ * user is expected to refine.
+ */
+
+const SINGLE_USE = { uses: 1, reprocessingKgPerUse: 0, energyKwhPerUse: 0, country: 'global' };
+
+const ASIA_TO_HOSPITAL = [
+  { mode: 'road', km: 300 },
+  { mode: 'sea', km: 12000 },
+  { mode: 'road', km: 500 },
+];
+
+const PRODUCTS = [
+  {
+    id: 'latex-exam-glove',
+    name: 'Latex examination glove (non-sterile)',
+    aliases: ['latex glove', 'latex gloves', 'exam glove', 'examination glove', 'medical glove', 'rubber glove'],
+    category: 'Gloves',
+    functionalUnit: '1 glove',
+    components: [
+      { name: 'Glove film', material: 'natural_rubber_latex', massG: 5.5, process: 'dipping' },
+    ],
+    packaging: [
+      { name: 'Dispenser box + shipping carton (share)', material: 'cardboard', massG: 1.0 },
+    ],
+    country: 'malaysia',
+    sterilization: 'none',
+    transport: ASIA_TO_HOSPITAL,
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'recycling',
+  },
+  {
+    id: 'latex-surgical-glove',
+    name: 'Sterile latex surgical gloves (pair)',
+    aliases: ['surgical glove', 'surgical gloves', 'sterile glove', 'sterile latex glove'],
+    category: 'Gloves',
+    functionalUnit: '1 pair',
+    components: [
+      { name: 'Glove films (x2)', material: 'natural_rubber_latex', massG: 20, process: 'dipping' },
+    ],
+    packaging: [
+      { name: 'Inner paper wrap', material: 'paper', massG: 6 },
+      { name: 'Peel pouch film', material: 'ldpe', massG: 3 },
+      { name: 'Carton (share)', material: 'cardboard', massG: 4 },
+    ],
+    country: 'malaysia',
+    sterilization: 'gamma',
+    transport: ASIA_TO_HOSPITAL,
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'recycling',
+  },
+  {
+    id: 'nitrile-exam-glove',
+    name: 'Nitrile examination glove (non-sterile)',
+    aliases: ['nitrile glove', 'nitrile gloves', 'blue glove'],
+    category: 'Gloves',
+    functionalUnit: '1 glove',
+    components: [
+      { name: 'Glove film', material: 'nitrile_rubber', massG: 3.5, process: 'dipping' },
+    ],
+    packaging: [
+      { name: 'Dispenser box + shipping carton (share)', material: 'cardboard', massG: 0.8 },
+    ],
+    country: 'malaysia',
+    sterilization: 'none',
+    transport: ASIA_TO_HOSPITAL,
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'recycling',
+  },
+  {
+    id: 'vinyl-exam-glove',
+    name: 'Vinyl (PVC) examination glove',
+    aliases: ['vinyl glove', 'vinyl gloves', 'pvc glove'],
+    category: 'Gloves',
+    functionalUnit: '1 glove',
+    components: [
+      { name: 'Glove film', material: 'pvc', massG: 5.0, process: 'dipping' },
+    ],
+    packaging: [
+      { name: 'Dispenser box + shipping carton (share)', material: 'cardboard', massG: 0.9 },
+    ],
+    country: 'china',
+    sterilization: 'none',
+    transport: ASIA_TO_HOSPITAL,
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'recycling',
+  },
+  {
+    id: 'surgical-mask',
+    name: 'Surgical face mask (type IIR, 3-ply)',
+    aliases: ['face mask', 'mask', 'surgical mask', 'medical mask', 'procedure mask'],
+    category: 'Respiratory protection',
+    functionalUnit: '1 mask',
+    components: [
+      { name: '3-ply SMS body', material: 'pp_nonwoven', massG: 2.5, process: 'nonwoven' },
+      { name: 'Nose wire', material: 'steel', massG: 0.3, process: 'metal_forming' },
+      { name: 'Ear loops', material: 'polyurethane', massG: 0.5, process: 'extrusion' },
+    ],
+    packaging: [
+      { name: 'Box (share)', material: 'cardboard', massG: 0.8 },
+      { name: 'Bag (share)', material: 'ldpe', massG: 0.2 },
+    ],
+    country: 'china',
+    sterilization: 'none',
+    transport: ASIA_TO_HOSPITAL,
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'recycling',
+  },
+  {
+    id: 'ffp2-respirator',
+    name: 'FFP2 / N95 respirator',
+    aliases: ['n95', 'ffp2', 'ffp3', 'respirator', 'kn95'],
+    category: 'Respiratory protection',
+    functionalUnit: '1 respirator',
+    components: [
+      { name: 'Filter layers', material: 'pp_nonwoven', massG: 8, process: 'nonwoven' },
+      { name: 'Head straps', material: 'polyurethane', massG: 1.0, process: 'extrusion' },
+      { name: 'Nose clip', material: 'aluminium', massG: 0.5, process: 'metal_forming' },
+    ],
+    packaging: [
+      { name: 'Individual pouch', material: 'ldpe', massG: 1.0 },
+      { name: 'Box (share)', material: 'cardboard', massG: 2.0 },
+    ],
+    country: 'china',
+    sterilization: 'none',
+    transport: ASIA_TO_HOSPITAL,
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'recycling',
+  },
+  {
+    id: 'syringe-5ml',
+    name: 'Disposable syringe 5 mL (without needle)',
+    aliases: ['syringe', 'syringes', 'disposable syringe', 'luer syringe'],
+    category: 'Injection & infusion',
+    functionalUnit: '1 syringe',
+    components: [
+      { name: 'Barrel', material: 'polypropylene', massG: 3.2, process: 'injection_molding' },
+      { name: 'Plunger', material: 'polypropylene', massG: 1.4, process: 'injection_molding' },
+      { name: 'Plunger seal', material: 'synthetic_rubber', massG: 0.3, process: 'injection_molding' },
+    ],
+    packaging: [
+      { name: 'Blister paper', material: 'paper', massG: 1.0 },
+      { name: 'Blister film', material: 'ldpe', massG: 1.0 },
+      { name: 'Carton (share)', material: 'cardboard', massG: 1.5 },
+    ],
+    country: 'china',
+    sterilization: 'ethylene_oxide',
+    transport: ASIA_TO_HOSPITAL,
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'incineration',
+  },
+  {
+    id: 'hypodermic-needle',
+    name: 'Hypodermic needle 21G',
+    aliases: ['needle', 'needles', 'injection needle', 'hypodermic'],
+    category: 'Injection & infusion',
+    functionalUnit: '1 needle',
+    components: [
+      { name: 'Cannula', material: 'stainless_steel', massG: 0.15, process: 'metal_forming' },
+      { name: 'Hub', material: 'polypropylene', massG: 0.5, process: 'injection_molding' },
+      { name: 'Protective cap', material: 'hdpe', massG: 0.4, process: 'injection_molding' },
+    ],
+    packaging: [
+      { name: 'Blister paper', material: 'paper', massG: 0.5 },
+      { name: 'Blister film', material: 'ldpe', massG: 0.3 },
+    ],
+    country: 'china',
+    sterilization: 'ethylene_oxide',
+    transport: ASIA_TO_HOSPITAL,
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'incineration',
+  },
+  {
+    id: 'iv-cannula',
+    name: 'Peripheral IV cannula',
+    aliases: ['cannula', 'iv cannula', 'venflon', 'catheter iv', 'peripheral catheter'],
+    category: 'Injection & infusion',
+    functionalUnit: '1 cannula',
+    components: [
+      { name: 'Catheter tube', material: 'polyurethane', massG: 0.2, process: 'extrusion' },
+      { name: 'Hub & wings', material: 'polypropylene', massG: 2.5, process: 'injection_molding' },
+      { name: 'Introducer needle', material: 'stainless_steel', massG: 0.3, process: 'metal_forming' },
+      { name: 'Needle cap', material: 'hdpe', massG: 0.8, process: 'injection_molding' },
+    ],
+    packaging: [
+      { name: 'Peel pouch paper', material: 'paper', massG: 1.0 },
+      { name: 'Peel pouch film', material: 'ldpe', massG: 1.0 },
+    ],
+    country: 'malaysia',
+    sterilization: 'ethylene_oxide',
+    transport: ASIA_TO_HOSPITAL,
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'incineration',
+  },
+  {
+    id: 'iv-bag-1l',
+    name: 'IV fluid bag 1 L (empty container)',
+    aliases: ['iv bag', 'infusion bag', 'saline bag', 'drip bag'],
+    category: 'Injection & infusion',
+    functionalUnit: '1 bag (container only, excludes the fluid)',
+    components: [
+      { name: 'Bag film and ports', material: 'pvc', massG: 50, process: 'extrusion' },
+    ],
+    packaging: [
+      { name: 'Overwrap', material: 'ldpe', massG: 8 },
+      { name: 'Carton (share)', material: 'cardboard', massG: 15 },
+    ],
+    country: 'global',
+    sterilization: 'steam',
+    transport: [{ mode: 'road', km: 1000 }],
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'recycling',
+  },
+  {
+    id: 'iv-administration-set',
+    name: 'IV administration (giving) set',
+    aliases: ['iv set', 'giving set', 'infusion set', 'iv line', 'drip set'],
+    category: 'Injection & infusion',
+    functionalUnit: '1 set',
+    components: [
+      { name: 'Tubing', material: 'pvc', massG: 20, process: 'extrusion' },
+      { name: 'Drip chamber & spike', material: 'polypropylene', massG: 4, process: 'injection_molding' },
+      { name: 'Roller clamp & connector', material: 'abs', massG: 3, process: 'injection_molding' },
+    ],
+    packaging: [
+      { name: 'Peel pouch paper', material: 'paper', massG: 3 },
+      { name: 'Peel pouch film', material: 'ldpe', massG: 3 },
+      { name: 'Carton (share)', material: 'cardboard', massG: 5 },
+    ],
+    country: 'mexico',
+    sterilization: 'ethylene_oxide',
+    transport: [{ mode: 'road', km: 2500 }],
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'incineration',
+  },
+  {
+    id: 'foley-catheter',
+    name: 'Foley urinary catheter (silicone)',
+    aliases: ['foley', 'urinary catheter', 'catheter', 'silicone catheter'],
+    category: 'Catheters & tubes',
+    functionalUnit: '1 catheter',
+    components: [
+      { name: 'Catheter shaft & balloon', material: 'silicone', massG: 12, process: 'injection_molding' },
+    ],
+    packaging: [
+      { name: 'Peel pouch paper', material: 'paper', massG: 5 },
+      { name: 'Peel pouch film', material: 'ldpe', massG: 5 },
+    ],
+    country: 'malaysia',
+    sterilization: 'ethylene_oxide',
+    transport: ASIA_TO_HOSPITAL,
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'incineration',
+  },
+  {
+    id: 'single-use-surgical-gown',
+    name: 'Single-use surgical gown (SMS polypropylene)',
+    aliases: ['gown', 'surgical gown', 'disposable gown', 'isolation gown'],
+    category: 'Apparel & drapes',
+    functionalUnit: '1 gown',
+    components: [
+      { name: 'Gown body', material: 'pp_nonwoven', massG: 150, process: 'nonwoven' },
+    ],
+    packaging: [
+      { name: 'Wrap', material: 'paper', massG: 20 },
+      { name: 'Pouch', material: 'ldpe', massG: 15 },
+      { name: 'Carton (share)', material: 'cardboard', massG: 20 },
+    ],
+    country: 'china',
+    sterilization: 'ethylene_oxide',
+    transport: ASIA_TO_HOSPITAL,
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'incineration',
+  },
+  {
+    id: 'reusable-surgical-gown',
+    name: 'Reusable surgical gown (polyester, 75 cycles)',
+    aliases: ['reusable gown', 'washable gown', 'textile gown'],
+    category: 'Apparel & drapes',
+    functionalUnit: '1 use',
+    components: [
+      { name: 'Gown body', material: 'polyester_textile', massG: 350, process: 'textile' },
+    ],
+    packaging: [
+      { name: 'Delivery bag (share)', material: 'ldpe', massG: 10 },
+    ],
+    country: 'china',
+    sterilization: 'none',
+    transport: ASIA_TO_HOSPITAL,
+    use: { uses: 75, reprocessingKgPerUse: 0.25, energyKwhPerUse: 0, country: 'global' },
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'recycling',
+  },
+  {
+    id: 'cotton-gauze-swab',
+    name: 'Cotton gauze swab 10 x 10 cm',
+    aliases: ['gauze', 'swab', 'gauze swab', 'gauze pad', 'sponge'],
+    category: 'Wound care',
+    functionalUnit: '1 swab',
+    components: [
+      { name: 'Woven gauze', material: 'cotton', massG: 1.0, process: 'textile' },
+    ],
+    packaging: [
+      { name: 'Paper wrap (share)', material: 'paper', massG: 0.3 },
+    ],
+    country: 'china',
+    sterilization: 'none',
+    transport: ASIA_TO_HOSPITAL,
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'recycling',
+  },
+  {
+    id: 'specimen-container',
+    name: 'Specimen container 60 mL (sterile)',
+    aliases: ['specimen cup', 'urine cup', 'sample container', 'specimen jar'],
+    category: 'Laboratory',
+    functionalUnit: '1 container',
+    components: [
+      { name: 'Pot', material: 'polypropylene', massG: 8, process: 'injection_molding' },
+      { name: 'Screw lid', material: 'hdpe', massG: 3, process: 'injection_molding' },
+    ],
+    packaging: [
+      { name: 'Bag (share)', material: 'ldpe', massG: 0.5 },
+    ],
+    country: 'global',
+    sterilization: 'gamma',
+    transport: [{ mode: 'road', km: 1500 }],
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'recycling',
+  },
+  {
+    id: 'blood-collection-tube',
+    name: 'Vacuum blood collection tube (PET)',
+    aliases: ['blood tube', 'vacutainer', 'collection tube', 'test tube'],
+    category: 'Laboratory',
+    functionalUnit: '1 tube',
+    components: [
+      { name: 'Tube', material: 'pet', massG: 4, process: 'injection_molding' },
+      { name: 'Stopper', material: 'synthetic_rubber', massG: 1, process: 'injection_molding' },
+      { name: 'Cap', material: 'hdpe', massG: 1.5, process: 'injection_molding' },
+      { name: 'Label', material: 'paper', massG: 0.1, process: 'converting' },
+    ],
+    packaging: [
+      { name: 'Tray (share)', material: 'polystyrene', massG: 0.5 },
+    ],
+    country: 'usa',
+    sterilization: 'gamma',
+    transport: [{ mode: 'road', km: 800 }, { mode: 'sea', km: 9000 }, { mode: 'road', km: 300 }],
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'recycling',
+  },
+  {
+    id: 'face-shield',
+    name: 'Disposable face shield',
+    aliases: ['visor', 'face shield', 'faceshield'],
+    category: 'Respiratory protection',
+    functionalUnit: '1 shield',
+    components: [
+      { name: 'Visor', material: 'pet', massG: 30, process: 'extrusion' },
+      { name: 'Foam headband', material: 'polyurethane', massG: 2, process: 'extrusion' },
+      { name: 'Elastic band', material: 'polyurethane', massG: 2, process: 'extrusion' },
+    ],
+    packaging: [
+      { name: 'Box (share)', material: 'cardboard', massG: 5 },
+    ],
+    country: 'china',
+    sterilization: 'none',
+    transport: ASIA_TO_HOSPITAL,
+    use: SINGLE_USE,
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'recycling',
+  },
+  {
+    id: 'reusable-surgical-scissors',
+    name: 'Reusable stainless steel surgical scissors (500 cycles)',
+    aliases: ['scissors', 'surgical scissors', 'mayo scissors', 'surgical instrument'],
+    category: 'Surgical instruments',
+    functionalUnit: '1 use',
+    components: [
+      { name: 'Scissors', material: 'stainless_steel', massG: 60, process: 'metal_forming' },
+    ],
+    packaging: [
+      { name: 'Pouch', material: 'ldpe', massG: 5 },
+    ],
+    country: 'germany',
+    sterilization: 'none',
+    transport: [{ mode: 'road', km: 3000 }],
+    use: { uses: 500, reprocessingKgPerUse: 0.05, energyKwhPerUse: 0, country: 'global' },
+    endOfLife: 'recycling',
+    packagingEndOfLife: 'recycling',
+  },
+  {
+    id: 'pulse-oximeter',
+    name: 'Fingertip pulse oximeter (reusable)',
+    aliases: ['oximeter', 'pulse ox', 'spo2 meter', 'saturation monitor'],
+    category: 'Electronic devices',
+    functionalUnit: '1 use',
+    components: [
+      { name: 'Housing', material: 'abs', massG: 25, process: 'injection_molding' },
+      { name: 'Electronics & display', material: 'electronics', massG: 8, process: 'electronics_assembly' },
+      { name: 'Finger pad', material: 'silicone', massG: 2, process: 'injection_molding' },
+    ],
+    packaging: [
+      { name: 'Box', material: 'cardboard', massG: 40 },
+      { name: 'Bag', material: 'ldpe', massG: 5 },
+    ],
+    country: 'china',
+    sterilization: 'none',
+    transport: ASIA_TO_HOSPITAL,
+    use: { uses: 2000, reprocessingKgPerUse: 0.002, energyKwhPerUse: 0.0005, country: 'global' },
+    endOfLife: 'recycling',
+    packagingEndOfLife: 'recycling',
+  },
+];
+
+module.exports = { PRODUCTS };
+
+},
+"src/engine/calculator.js": function (module, exports, require) {
+'use strict';
+
+const {
+  MATERIALS,
+  PROCESSES,
+  GRID,
+  STERILIZATION,
+  TRANSPORT,
+  END_OF_LIFE,
+  EQUIVALENTS,
+} = require('../data/factors');
+
+const STAGES = [
+  { key: 'materials', label: 'Raw materials' },
+  { key: 'manufacturing', label: 'Manufacturing' },
+  { key: 'packaging', label: 'Packaging' },
+  { key: 'sterilization', label: 'Sterilisation' },
+  { key: 'transport', label: 'Transport' },
+  { key: 'use', label: 'Use & reprocessing' },
+  { key: 'endOfLife', label: 'End of life' },
+];
+
+const LIMITS = {
+  maxItems: 50,
+  maxMassG: 1e6, // 1 tonne per functional unit
+  maxKm: 50000,
+  maxUses: 1e6,
+  maxQuantity: 1e9,
+};
+
+class ValidationError extends Error {
+  constructor(errors) {
+    super(errors.join('; '));
+    this.name = 'ValidationError';
+    this.errors = errors;
+  }
+}
+
+function isFiniteNumber(v) {
+  return typeof v === 'number' && Number.isFinite(v);
+}
+
+function checkNumber(errors, value, label, { min = 0, max = Infinity } = {}) {
+  if (!isFiniteNumber(value) || value < min || value > max) {
+    errors.push(`${label} must be a number between ${min} and ${max}`);
+  }
+}
+
+function checkKey(errors, table, key, label) {
+  if (typeof key !== 'string' || !Object.prototype.hasOwnProperty.call(table, key)) {
+    errors.push(`${label} "${key}" is not recognised`);
+  }
+}
+
+function checkList(errors, list, label, required) {
+  if (!Array.isArray(list)) {
+    errors.push(`${label} must be a list`);
+    return false;
+  }
+  if (required && list.length === 0) errors.push(`${label} must contain at least one item`);
+  if (list.length > LIMITS.maxItems) errors.push(`${label} may contain at most ${LIMITS.maxItems} items`);
+  return true;
+}
+
+/** Throws a ValidationError listing every problem found in the product definition. */
+function validateProduct(product) {
+  const errors = [];
+  if (!product || typeof product !== 'object' || Array.isArray(product)) {
+    throw new ValidationError(['product must be an object']);
+  }
+  if (typeof product.name !== 'string' || !product.name.trim() || product.name.length > 200) {
+    errors.push('name must be a non-empty string of at most 200 characters');
+  }
+
+  if (checkList(errors, product.components, 'components', true)) {
+    product.components.forEach((c, i) => {
+      const at = `components[${i}]`;
+      if (!c || typeof c !== 'object') return errors.push(`${at} must be an object`);
+      checkKey(errors, MATERIALS, c.material, `${at}.material`);
+      checkKey(errors, PROCESSES, c.process, `${at}.process`);
+      checkNumber(errors, c.massG, `${at}.massG`, { max: LIMITS.maxMassG });
+      return undefined;
+    });
+  }
+
+  if (checkList(errors, product.packaging || [], 'packaging', false)) {
+    (product.packaging || []).forEach((p, i) => {
+      const at = `packaging[${i}]`;
+      if (!p || typeof p !== 'object') return errors.push(`${at} must be an object`);
+      checkKey(errors, MATERIALS, p.material, `${at}.material`);
+      checkNumber(errors, p.massG, `${at}.massG`, { max: LIMITS.maxMassG });
+      return undefined;
+    });
+  }
+
+  if (checkList(errors, product.transport || [], 'transport', false)) {
+    (product.transport || []).forEach((t, i) => {
+      const at = `transport[${i}]`;
+      if (!t || typeof t !== 'object') return errors.push(`${at} must be an object`);
+      checkKey(errors, TRANSPORT, t.mode, `${at}.mode`);
+      checkNumber(errors, t.km, `${at}.km`, { max: LIMITS.maxKm });
+      return undefined;
+    });
+  }
+
+  checkKey(errors, GRID, product.country, 'country');
+  checkKey(errors, STERILIZATION, product.sterilization, 'sterilization');
+  checkKey(errors, END_OF_LIFE, product.endOfLife, 'endOfLife');
+  if (product.packagingEndOfLife !== undefined) {
+    checkKey(errors, END_OF_LIFE, product.packagingEndOfLife, 'packagingEndOfLife');
+  }
+
+  const use = product.use;
+  if (use !== undefined) {
+    if (!use || typeof use !== 'object') {
+      errors.push('use must be an object');
+    } else {
+      checkNumber(errors, use.uses, 'use.uses', { min: 1, max: LIMITS.maxUses });
+      if (isFiniteNumber(use.uses) && !Number.isInteger(use.uses)) errors.push('use.uses must be a whole number');
+      checkNumber(errors, use.reprocessingKgPerUse ?? 0, 'use.reprocessingKgPerUse', { max: 1000 });
+      checkNumber(errors, use.energyKwhPerUse ?? 0, 'use.energyKwhPerUse', { max: 10000 });
+      if (use.country !== undefined) checkKey(errors, GRID, use.country, 'use.country');
+    }
+  }
+
+  if (errors.length) throw new ValidationError(errors);
+}
+
+const round = (v, digits = 6) => Number(v.toFixed(digits));
+
+/**
+ * Cradle-to-grave footprint of one functional unit.
+ *
+ * Returns kg CO2e per *use*; for reusable products the production, transport
+ * and disposal of the item are divided over `use.uses` cycles, and each cycle
+ * adds its own reprocessing and energy-in-use emissions.
+ */
+function calculateFootprint(product, quantity = 1) {
+  validateProduct(product);
+  if (!isFiniteNumber(quantity) || quantity <= 0 || quantity > LIMITS.maxQuantity) {
+    throw new ValidationError([`quantity must be a number between 0 and ${LIMITS.maxQuantity}`]);
+  }
+
+  const packaging = product.packaging || [];
+  const transport = product.transport || [];
+  const use = { uses: 1, reprocessingKgPerUse: 0, energyKwhPerUse: 0, country: product.country, ...product.use };
+  const grid = GRID[product.country].factor;
+  const packagingRoute = product.packagingEndOfLife || product.endOfLife;
+
+  const productMassKg = product.components.reduce((s, c) => s + c.massG / 1000, 0);
+  const packagingMassKg = packaging.reduce((s, p) => s + p.massG / 1000, 0);
+  const shippedMassKg = productMassKg + packagingMassKg;
+
+  // Per-component detail lets the UI point at hotspots.
+  const components = product.components.map((c) => {
+    const kg = c.massG / 1000;
+    const material = kg * MATERIALS[c.material].factor;
+    const manufacturing = kg * PROCESSES[c.process].kwhPerKg * grid;
+    const endOfLife = kg * MATERIALS[c.material].eol[product.endOfLife];
+    return {
+      name: c.name || MATERIALS[c.material].name,
+      material: c.material,
+      materialName: MATERIALS[c.material].name,
+      massG: c.massG,
+      kgCO2e: { material, manufacturing, endOfLife, total: material + manufacturing + endOfLife },
+    };
+  });
+
+  const unit = {
+    materials: components.reduce((s, c) => s + c.kgCO2e.material, 0),
+    manufacturing: components.reduce((s, c) => s + c.kgCO2e.manufacturing, 0),
+    packaging: packaging.reduce((s, p) => s + (p.massG / 1000) * MATERIALS[p.material].factor, 0),
+    sterilization: shippedMassKg * STERILIZATION[product.sterilization].factor,
+    transport: transport.reduce((s, t) => s + (shippedMassKg / 1000) * t.km * TRANSPORT[t.mode].factor, 0),
+    endOfLife:
+      components.reduce((s, c) => s + c.kgCO2e.endOfLife, 0) +
+      packaging.reduce((s, p) => s + (p.massG / 1000) * MATERIALS[p.material].eol[packagingRoute], 0),
+  };
+
+  const perUseUse =
+    (use.reprocessingKgPerUse || 0) + (use.energyKwhPerUse || 0) * GRID[use.country || product.country].factor;
+
+  const perUse = {};
+  for (const { key } of STAGES) {
+    perUse[key] = key === 'use' ? perUseUse : unit[key] / use.uses;
+  }
+  const totalPerUse = Object.values(perUse).reduce((s, v) => s + v, 0);
+  const lifetimeTotal = totalPerUse * use.uses;
+
+  const stages = STAGES.map(({ key, label }) => ({
+    key,
+    label,
+    kgCO2e: round(perUse[key]),
+    share: totalPerUse > 0 ? round(perUse[key] / totalPerUse, 4) : 0,
+  }));
+
+  const quantityTotal = totalPerUse * quantity;
+  const equivalents = Object.entries(EQUIVALENTS).map(([key, e]) => ({
+    key,
+    label: e.label,
+    value: round(quantityTotal / e.factor, 2),
+  }));
+
+  for (const c of components) {
+    for (const k of Object.keys(c.kgCO2e)) c.kgCO2e[k] = round(c.kgCO2e[k] / use.uses);
+  }
+  components.sort((a, b) => b.kgCO2e.total - a.kgCO2e.total);
+
+  return {
+    name: product.name,
+    functionalUnit: product.functionalUnit || '1 unit',
+    reusable: use.uses > 1,
+    uses: use.uses,
+    massG: { product: round(productMassKg * 1000, 3), packaging: round(packagingMassKg * 1000, 3) },
+    perUseKgCO2e: round(totalPerUse),
+    lifetimeKgCO2e: round(lifetimeTotal),
+    quantity,
+    quantityKgCO2e: round(quantityTotal),
+    // Secondary-data screening estimates are commonly quoted at about ±30 %.
+    uncertainty: { low: round(quantityTotal * 0.7), high: round(quantityTotal * 1.3), note: '±30 % screening-level uncertainty' },
+    stages,
+    hotspot: stages.reduce((a, b) => (b.kgCO2e > a.kgCO2e ? b : a)),
+    components,
+    equivalents,
+    recommendations: recommend(product, perUse, totalPerUse),
+  };
+}
+
+function recommend(product, perUse, total) {
+  const tips = [];
+  const share = (k) => (total > 0 ? perUse[k] / total : 0);
+  const materials = product.components.map((c) => c.material);
+
+  if (share('materials') > 0.3) {
+    tips.push('Raw materials dominate: lighter-gauge designs (less material per unit) cut emissions almost proportionally.');
+  }
+  if (share('manufacturing') > 0.25 && GRID[product.country].factor > 0.4) {
+    tips.push(`Manufacturing on the ${GRID[product.country].name} grid (${GRID[product.country].factor} kg CO2e/kWh) is a hotspot: prefer suppliers using renewable electricity or biomass-fired drying ovens.`);
+  }
+  if (product.sterilization === 'ethylene_oxide') {
+    tips.push('EtO sterilisation is carbon- and toxicity-intensive: ask whether gamma or e-beam sterilisation is validated for this product.');
+  }
+  if (product.sterilization !== 'none' && share('sterilization') > 0.1) {
+    tips.push('Sterilisation is significant: confirm sterility is clinically required, or bundle items into procedure packs to sterilise less packaging.');
+  }
+  if ((product.transport || []).some((t) => t.mode === 'air')) {
+    tips.push('Air freight emits ~40x more per tonne-km than container shipping: plan inventory to avoid air shipments.');
+  }
+  if (share('packaging') > 0.15) {
+    tips.push('Packaging is a large share: request bulk/reduced packaging and recycled-content cartons.');
+  }
+  if (product.endOfLife === 'incineration' && materials.some((m) => ['polypropylene', 'pp_nonwoven', 'hdpe', 'ldpe', 'pet', 'nitrile_rubber', 'polystyrene'].includes(m)) && share('endOfLife') > 0.15) {
+    tips.push('Fossil-based plastics release their carbon when incinerated: correct waste segregation (domestic or recycling instead of clinical waste where safe) reduces end-of-life emissions.');
+  }
+  if (materials.includes('natural_rubber_latex') || materials.includes('nitrile_rubber') || materials.includes('pvc')) {
+    tips.push('Glove stewardship: avoiding unnecessary glove use (e.g. hand hygiene instead of gloves for routine non-contact care) is the most effective reduction.');
+  }
+  if ((product.use?.uses || 1) === 1) {
+    tips.push('Check whether a reusable or remanufactured alternative exists; for many items the per-use footprint falls by 50-80 %.');
+  }
+  return tips;
+}
+
+module.exports = { calculateFootprint, validateProduct, ValidationError, STAGES, LIMITS };
+
+},
+"src/engine/search.js": function (module, exports, require) {
+'use strict';
+
+const { PRODUCTS } = require('../data/products');
+
+const STOP_WORDS = new Set(['a', 'an', 'the', 'of', 'for', 'and', 'with', 'medical', 'disposable', 'single', 'use']);
+
+function normalize(text) {
+  return String(text || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function stem(word) {
+  if (word.length > 4 && word.endsWith('es') && /(ss|sh|ch|x)es$/.test(word)) return word.slice(0, -2);
+  if (word.length > 3 && word.endsWith('s') && !word.endsWith('ss')) return word.slice(0, -1);
+  return word;
+}
+
+function tokenize(text) {
+  return normalize(text)
+    .split(' ')
+    .filter((w) => w && !STOP_WORDS.has(w))
+    .map(stem);
+}
+
+function levenshtein(a, b) {
+  if (a === b) return 0;
+  const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i += 1) {
+    let diag = prev[0];
+    prev[0] = i;
+    for (let j = 1; j <= b.length; j += 1) {
+      const tmp = prev[j];
+      prev[j] = Math.min(prev[j] + 1, prev[j - 1] + 1, diag + (a[i - 1] === b[j - 1] ? 0 : 1));
+      diag = tmp;
+    }
+  }
+  return prev[b.length];
+}
+
+/** 1 for an exact token match, 0.8 for a prefix, 0.7 for a small typo, else 0. */
+function tokenSimilarity(q, t) {
+  if (q === t) return 1;
+  if (q.length >= 3 && t.startsWith(q)) return 0.8;
+  const allowed = q.length >= 7 ? 2 : q.length >= 4 ? 1 : 0;
+  return allowed && levenshtein(q, t) <= allowed ? 0.7 : 0;
+}
+
+function scoreAgainst(queryTokens, text) {
+  const target = tokenize(text);
+  if (!target.length || !queryTokens.length) return 0;
+  let matched = 0;
+  for (const q of queryTokens) {
+    matched += Math.max(0, ...target.map((t) => tokenSimilarity(q, t)));
+  }
+  // Recall over the query, lightly penalising long candidate names.
+  const recall = matched / queryTokens.length;
+  const precision = matched / target.length;
+  return 0.75 * recall + 0.25 * precision;
+}
+
+/**
+ * Ranks library products against a free-text query such as "latex glove".
+ * Returns [{ product, score }] with score in (0, 1], best first.
+ */
+function searchProducts(query, { limit = 8, minScore = 0.45 } = {}) {
+  const q = normalize(query);
+  if (!q) {
+    return PRODUCTS.slice(0, limit).map((product) => ({ product, score: 0 }));
+  }
+  const queryTokens = tokenize(q);
+  return PRODUCTS.map((product) => {
+    const names = [product.name, ...product.aliases];
+    let score = Math.max(...names.map((n) => scoreAgainst(queryTokens, n)));
+    if (names.some((n) => normalize(n) === q)) score = Math.max(score, 1);
+    return { product, score: Number(score.toFixed(3)) };
+  })
+    .filter((r) => r.score >= minScore)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+}
+
+function findProductById(id) {
+  return PRODUCTS.find((p) => p.id === id) || null;
+}
+
+// Keyword hints used to draft a bill of materials for products that are not
+// in the library. Order matters: the first match wins.
+const MATERIAL_HINTS = [
+  [['latex', 'rubber'], 'natural_rubber_latex', 'dipping'],
+  [['nitrile'], 'nitrile_rubber', 'dipping'],
+  [['vinyl', 'pvc', 'tubing', 'tube', 'bag'], 'pvc', 'extrusion'],
+  [['silicone'], 'silicone', 'injection_molding'],
+  [['cotton', 'gauze', 'bandage', 'linen', 'towel'], 'cotton', 'textile'],
+  [['polyester', 'scrub', 'uniform'], 'polyester_textile', 'textile'],
+  [['nonwoven', 'drape', 'gown', 'cap', 'mask', 'apron', 'cover'], 'pp_nonwoven', 'nonwoven'],
+  [['steel', 'stainless', 'scalpel', 'forcep', 'scissor', 'clamp', 'instrument', 'needle', 'blade'], 'stainless_steel', 'metal_forming'],
+  [['aluminium', 'aluminum'], 'aluminium', 'metal_forming'],
+  [['glass', 'vial', 'ampoule'], 'glass', 'blow_molding'],
+  [['paper', 'cardboard'], 'paper', 'converting'],
+  [['monitor', 'thermometer', 'meter', 'sensor', 'electronic', 'pump', 'device'], 'abs', 'injection_molding'],
+  [['polycarbonate'], 'polycarbonate', 'injection_molding'],
+  [['polystyrene', 'petri', 'dish'], 'polystyrene', 'injection_molding'],
+  [['pet', 'bottle'], 'pet', 'blow_molding'],
+];
+
+const DEFAULT_MASS_G = 10;
+
+/**
+ * Builds an editable starting point for a product that is not in the
+ * library, guessing the main material from words in its name.
+ */
+function draftProduct(name) {
+  const tokens = tokenize(name);
+  let material = 'polypropylene';
+  let process = 'injection_molding';
+  let matchedHint = null;
+  for (const [words, m, p] of MATERIAL_HINTS) {
+    const hit = words.find((w) => tokens.some((t) => t === w || t.startsWith(w)));
+    if (hit) {
+      material = m;
+      process = p;
+      matchedHint = hit;
+      break;
+    }
+  }
+  const sterile = tokens.some((t) => ['sterile', 'surgical', 'implant', 'syringe', 'catheter', 'needle'].includes(t));
+  return {
+    id: null,
+    name: String(name || 'Custom product').trim().slice(0, 200) || 'Custom product',
+    category: 'Custom',
+    functionalUnit: '1 unit',
+    draft: true,
+    draftNote: matchedHint
+      ? `Not in the library. Main material guessed from "${matchedHint}"; please check the material and enter the real mass.`
+      : 'Not in the library. Defaulted to polypropylene; please enter the real materials and masses.',
+    components: [{ name: 'Main body', material, massG: DEFAULT_MASS_G, process }],
+    packaging: [{ name: 'Packaging (share)', material: 'cardboard', massG: 2 }],
+    country: 'china',
+    sterilization: sterile ? 'ethylene_oxide' : 'none',
+    transport: [
+      { mode: 'road', km: 300 },
+      { mode: 'sea', km: 12000 },
+      { mode: 'road', km: 500 },
+    ],
+    use: { uses: 1, reprocessingKgPerUse: 0, energyKwhPerUse: 0, country: 'global' },
+    endOfLife: 'incineration',
+    packagingEndOfLife: 'recycling',
+  };
+}
+
+module.exports = { searchProducts, findProductById, draftProduct, normalize, tokenize, levenshtein };
+
+},
+"src/routes.js": function (module, exports, require) {
+'use strict';
+
+/**
+ * Transport-independent API routes. The Node server feeds HTTP requests in
+ * here, and the static build calls it directly in the browser, so both
+ * deployments answer every request identically.
+ */
+
+const factors = require('./data/factors');
+const { calculateFootprint, ValidationError } = require('./engine/calculator');
+const { searchProducts, findProductById, draftProduct } = require('./engine/search');
+
+function summary(product, score) {
+  return {
+    id: product.id,
+    name: product.name,
+    category: product.category,
+    functionalUnit: product.functionalUnit,
+    score,
+  };
+}
+
+function factorTables() {
+  const pick = (table, fields) =>
+    Object.fromEntries(Object.entries(table).map(([k, v]) => [k, Object.fromEntries(fields.map((f) => [f, v[f]]))]));
+  return {
+    materials: pick(factors.MATERIALS, ['name', 'factor', 'eol']),
+    processes: pick(factors.PROCESSES, ['name', 'kwhPerKg']),
+    grid: pick(factors.GRID, ['name', 'factor']),
+    sterilization: pick(factors.STERILIZATION, ['name', 'factor']),
+    transport: pick(factors.TRANSPORT, ['name', 'factor']),
+    endOfLife: pick(factors.END_OF_LIFE, ['name']),
+  };
+}
+
+/**
+ * @param {string} method HTTP method
+ * @param {string} pathname e.g. "/api/products"
+ * @param {URLSearchParams} searchParams
+ * @param {() => Promise<object>} readBody resolves the parsed JSON body
+ * @returns {Promise<{status: number, body: object}>}
+ */
+async function route(method, pathname, searchParams, readBody) {
+  try {
+    if (method === 'GET' && pathname === '/api/products') {
+      const q = searchParams.get('q') || '';
+      const results = searchProducts(q.slice(0, 200));
+      return { status: 200, body: { query: q, results: results.map((r) => summary(r.product, r.score)) } };
+    }
+
+    const productMatch = pathname.match(/^\/api\/products\/([a-z0-9-]+)$/);
+    if (method === 'GET' && productMatch) {
+      const product = findProductById(productMatch[1]);
+      if (!product) return { status: 404, body: { error: 'Product not found' } };
+      return { status: 200, body: product };
+    }
+
+    if (method === 'GET' && pathname === '/api/factors') {
+      return { status: 200, body: factorTables() };
+    }
+
+    if (method === 'POST' && pathname === '/api/draft') {
+      const body = await readBody();
+      if (typeof body.name !== 'string' || !body.name.trim()) {
+        return { status: 400, body: { error: 'name is required' } };
+      }
+      return { status: 200, body: draftProduct(body.name) };
+    }
+
+    if (method === 'POST' && pathname === '/api/estimate') {
+      const body = await readBody();
+      const quantity = body.quantity === undefined ? 1 : body.quantity;
+      return { status: 200, body: calculateFootprint(body.product, quantity) };
+    }
+
+    return { status: 404, body: { error: 'Not found' } };
+  } catch (err) {
+    if (err instanceof ValidationError) return { status: 422, body: { error: 'Invalid product', details: err.errors } };
+    if (err.status) return { status: err.status, body: { error: err.message } };
+    throw err;
+  }
+}
+
+module.exports = { route };
+
+}
+  };
+  var cache = {};
+  function resolve(from, spec) {
+    var parts = from.split('/').slice(0, -1);
+    spec.split('/').forEach(function (p) {
+      if (p === '..') parts.pop();
+      else if (p !== '.') parts.push(p);
+    });
+    var id = parts.join('/');
+    return /\.js$/.test(id) ? id : id + '.js';
+  }
+  function load(id) {
+    if (cache[id]) return cache[id].exports;
+    if (!defs[id]) throw new Error('Module not bundled: ' + id);
+    var module = { exports: {} };
+    cache[id] = module;
+    defs[id](module, module.exports, function (spec) { return load(resolve(id, spec)); });
+    return module.exports;
+  }
+  var routes = load('src/routes.js');
+  window.MCF_LOCAL_API = function (url, options) {
+    options = options || {};
+    var u = new URL(url, 'http://local');
+    var body = options.body ? JSON.parse(options.body) : {};
+    return routes.route(options.method || 'GET', u.pathname, u.searchParams, function () {
+      return Promise.resolve(body);
+    }).then(function (res) {
+      // Hand the UI a copy so edits never touch the bundled library.
+      return { status: res.status, body: JSON.parse(JSON.stringify(res.body)) };
+    });
+  };
+})();
+</script>
+<script>
+'use strict';
+
+(() => {
+  const $ = (sel) => document.querySelector(sel);
+
+  const state = {
+    factors: null,
+    product: null,
+    result: null,
+    quantity: 1,
+    suggestions: [],
+    activeIndex: -1,
+    estimateSeq: 0,
+  };
+
+  const COMPARE_KEY = 'mcf-compare-v1';
+  const COPY_EXPORT = window.MCF_EXPORT === 'copy';
+  const THEME_KEY = 'mcf-theme';
+  const MAX_COMPARE = 12;
+
+  // ---------- helpers ----------
+
+  function el(tag, attrs = {}, children = []) {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v === undefined || v === null || v === false) continue;
+      if (k === 'text') node.textContent = v;
+      else if (k === 'className') node.className = v;
+      else if (k.startsWith('on')) node.addEventListener(k.slice(2), v);
+      else node.setAttribute(k, v === true ? '' : v);
+    }
+    for (const child of [].concat(children)) {
+      if (child === null || child === undefined || child === false) continue;
+      node.append(child instanceof Node ? child : document.createTextNode(String(child)));
+    }
+    return node;
+  }
+
+  function debounce(fn, ms) {
+    let t;
+    const debounced = (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn(...args), ms);
+    };
+    debounced.cancel = () => clearTimeout(t);
+    return debounced;
+  }
+
+  async function api(path, options = {}) {
+    // The static build bundles the engine and answers requests in-page.
+    if (typeof window.MCF_LOCAL_API === 'function') {
+      const { status, body } = await window.MCF_LOCAL_API(path, options);
+      if (status >= 400) {
+        const err = new Error(body.error || `Request failed (${status})`);
+        err.details = body.details;
+        throw err;
+      }
+      return body;
+    }
+    const res = await fetch(path, {
+      ...options,
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const err = new Error(body.error || `Request failed (${res.status})`);
+      err.details = body.details;
+      throw err;
+    }
+    return body;
+  }
+
+  function sig(value, digits = 3) {
+    if (value === 0) return '0';
+    const abs = Math.abs(value);
+    if (abs >= 1000) return Math.round(value).toLocaleString();
+    return Number(value.toPrecision(digits)).toLocaleString(undefined, { maximumFractionDigits: 6 });
+  }
+
+  /** Formats kg CO2e with a sensible unit: g below 1 kg, t from 1000 kg. */
+  function fmtCO2(kg) {
+    const abs = Math.abs(kg);
+    if (abs >= 1000) return { value: sig(kg / 1000), unit: 't CO₂e' };
+    if (abs >= 1) return { value: sig(kg), unit: 'kg CO₂e' };
+    return { value: sig(kg * 1000), unit: 'g CO₂e' };
+  }
+  const fmtText = (kg) => {
+    const f = fmtCO2(kg);
+    return `${f.value} ${f.unit}`;
+  };
+  const pct = (share) => `${(share * 100).toFixed(share >= 0.1 ? 0 : 1)}%`;
+
+  function setStatus(message, isError = false) {
+    const node = $('#status');
+    node.textContent = message || '';
+    node.classList.toggle('error', isError);
+  }
+
+  const storage = {
+    get(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch {
+        return fallback;
+      }
+    },
+    set(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch {
+        /* storage unavailable: feature degrades to in-memory only */
+      }
+    },
+  };
+
+  // ---------- tooltip ----------
+
+  const tooltip = $('#tooltip');
+  function attachTooltip(node, textFn) {
+    const show = (x, y) => {
+      tooltip.textContent = textFn();
+      tooltip.hidden = false;
+      const rect = tooltip.getBoundingClientRect();
+      const left = Math.min(Math.max(8, x + 12), window.innerWidth - rect.width - 8);
+      const top = y - rect.height - 12 < 8 ? y + 16 : y - rect.height - 12;
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+    };
+    node.addEventListener('mousemove', (e) => show(e.clientX, e.clientY));
+    node.addEventListener('mouseleave', () => { tooltip.hidden = true; });
+    node.addEventListener('focus', () => {
+      const r = node.getBoundingClientRect();
+      show(r.left + r.width / 2, r.top);
+    });
+    node.addEventListener('blur', () => { tooltip.hidden = true; });
+  }
+
+  // ---------- search / autocomplete ----------
+
+  const input = $('#product-input');
+  const list = $('#suggestions');
+
+  function closeSuggestions() {
+    // Invalidate any lookup still in flight so it cannot re-open the list.
+    state.suggestSeq = (state.suggestSeq || 0) + 1;
+    fetchSuggestions.cancel();
+    list.hidden = true;
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+    state.activeIndex = -1;
+  }
+
+  function renderSuggestions() {
+    list.replaceChildren();
+    const query = input.value.trim();
+    const items = state.suggestions.map((s) => ({ type: 'product', ...s }));
+    if (query) items.push({ type: 'custom', name: query });
+    if (!items.length) return closeSuggestions();
+
+    items.forEach((item, i) => {
+      const li = el('li', {
+        id: `sugg-${i}`,
+        role: 'option',
+        'aria-selected': i === state.activeIndex ? 'true' : 'false',
+        onmousedown: (e) => {
+          e.preventDefault();
+          chooseSuggestion(item);
+        },
+      }, item.type === 'product'
+        ? [item.name, el('span', { className: 's-meta', text: `${item.category} · per ${item.functionalUnit}` })]
+        : [`Define “${item.name}” as a custom product`, el('span', { className: 's-meta', text: 'Not listed? Build it from materials and masses' })]);
+      list.append(li);
+    });
+    list.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    if (state.activeIndex >= 0) input.setAttribute('aria-activedescendant', `sugg-${state.activeIndex}`);
+    else input.removeAttribute('aria-activedescendant');
+    state.renderedItems = items;
+    return undefined;
+  }
+
+  const fetchSuggestions = debounce(async () => {
+    const q = input.value.trim();
+    if (!q) {
+      state.suggestions = [];
+      return closeSuggestions();
+    }
+    const seq = state.suggestSeq;
+    try {
+      const { results } = await api(`/api/products?q=${encodeURIComponent(q)}`);
+      if (seq !== state.suggestSeq || input.value.trim() !== q) return undefined; // stale response
+      state.suggestions = results;
+      state.activeIndex = -1;
+      renderSuggestions();
+    } catch {
+      /* typing should never surface network noise; submit reports errors */
+    }
+    return undefined;
+  }, 150);
+
+  input.addEventListener('input', fetchSuggestions);
+  input.addEventListener('blur', () => setTimeout(closeSuggestions, 100));
+  input.addEventListener('keydown', (e) => {
+    const items = state.renderedItems || [];
+    if (list.hidden || !items.length) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const delta = e.key === 'ArrowDown' ? 1 : -1;
+      state.activeIndex = (state.activeIndex + delta + items.length) % items.length;
+      renderSuggestions();
+    } else if (e.key === 'Enter' && state.activeIndex >= 0) {
+      e.preventDefault();
+      chooseSuggestion(items[state.activeIndex]);
+    } else if (e.key === 'Escape') {
+      closeSuggestions();
+    }
+  });
+
+  function chooseSuggestion(item) {
+    closeSuggestions();
+    if (item.type === 'product') {
+      input.value = item.name;
+      loadProduct(item.id);
+    } else {
+      loadDraft(item.name);
+    }
+  }
+
+  $('#search-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    closeSuggestions();
+    const q = input.value.trim();
+    if (!q) {
+      setStatus('Type the name of a medical product, e.g. “latex glove”.', true);
+      input.focus();
+      return;
+    }
+    try {
+      const { results } = await api(`/api/products?q=${encodeURIComponent(q)}`);
+      if (results.length && results[0].score >= 0.6) {
+        await loadProduct(results[0].id, q);
+      } else {
+        await loadDraft(q);
+      }
+    } catch (err) {
+      setStatus(err.message, true);
+    }
+  });
+
+  document.querySelectorAll('[data-example]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      input.value = btn.dataset.example;
+      $('#search-form').requestSubmit();
+    });
+  });
+
+  $('#quantity-input').addEventListener('input', (e) => {
+    const q = Number(e.target.value);
+    const valid = Number.isFinite(q) && q > 0;
+    e.target.setAttribute('aria-invalid', valid ? 'false' : 'true');
+    if (!valid) return;
+    state.quantity = q;
+    if (state.product) scheduleEstimate();
+  });
+
+  async function loadProduct(id, query) {
+    const product = await api(`/api/products/${encodeURIComponent(id)}`);
+    await setProduct(product);
+    setStatus(query && query.toLowerCase() !== product.name.toLowerCase()
+      ? `Matched “${query}” to “${product.name}”. Not right? Pick another from the suggestions or edit the details.`
+      : `Loaded “${product.name}”.`);
+  }
+
+  async function loadDraft(name) {
+    const product = await api('/api/draft', { method: 'POST', body: JSON.stringify({ name }) });
+    await setProduct(product);
+    setStatus(`“${name}” is not in the library — a draft was created. Fill in its materials and masses.`);
+  }
+
+  async function setProduct(product) {
+    await factorsReady;
+    if (!state.factors) return;
+    state.product = structuredClone(product);
+    $('#workspace').hidden = false;
+    const note = $('#draft-note');
+    note.hidden = !product.draftNote;
+    note.textContent = product.draftNote || '';
+    renderEditor();
+    estimate();
+  }
+
+  // ---------- editor ----------
+
+  function optionsFrom(table, selected, labelFn = (v) => v.name) {
+    return Object.entries(table).map(([key, v]) =>
+      el('option', { value: key, selected: key === selected }, labelFn(v)));
+  }
+
+  function setPath(path, value) {
+    const keys = path.split('.');
+    let obj = state.product;
+    for (let i = 0; i < keys.length - 1; i += 1) {
+      obj[keys[i]] = obj[keys[i]] ?? {};
+      obj = obj[keys[i]];
+    }
+    obj[keys[keys.length - 1]] = value;
+  }
+
+  let fieldSeq = 0;
+  function field(labelText, path, value, { type = 'text', options, step, min, max } = {}) {
+    const id = `f-${(fieldSeq += 1)}`;
+    const control = options
+      ? el('select', { id, 'data-path': path }, options)
+      : el('input', { id, 'data-path': path, type, value: value ?? '', step, min, max, inputmode: type === 'number' ? 'decimal' : undefined });
+    if (type === 'number') control.dataset.number = 'true';
+    return el('div', { className: 'field' }, [el('label', { for: id, text: labelText }), control]);
+  }
+
+  function removeButton(listKey, index, label) {
+    return el('button', {
+      type: 'button',
+      className: 'icon-btn',
+      'aria-label': `Remove ${label}`,
+      title: 'Remove',
+      onclick: () => {
+        state.product[listKey].splice(index, 1);
+        renderEditor();
+        estimate();
+      },
+    }, '×');
+  }
+
+  function addButton(text, onclick) {
+    return el('button', { type: 'button', className: 'ghost small-btn add-btn', onclick }, text);
+  }
+
+  function renderEditor() {
+    const f = state.factors;
+    const p = state.product;
+    p.packaging = p.packaging || [];
+    p.transport = p.transport || [];
+    p.use = { uses: 1, reprocessingKgPerUse: 0, energyKwhPerUse: 0, country: 'global', ...p.use };
+    const materialLabel = (m) => `${m.name} (${m.factor} kg/kg)`;
+
+    const components = p.components.map((c, i) =>
+      el('div', { className: 'item-row component' }, [
+        field('Part', `components.${i}.name`, c.name),
+        field('Material', `components.${i}.material`, c.material, { options: optionsFrom(f.materials, c.material, materialLabel) }),
+        field('Mass (g)', `components.${i}.massG`, c.massG, { type: 'number', step: 'any', min: 0 }),
+        field('Process', `components.${i}.process`, c.process, { options: optionsFrom(f.processes, c.process) }),
+        p.components.length > 1 ? removeButton('components', i, c.name || 'component') : el('span'),
+      ]));
+
+    const packaging = p.packaging.map((pk, i) =>
+      el('div', { className: 'item-row pack' }, [
+        field('Item', `packaging.${i}.name`, pk.name),
+        field('Material', `packaging.${i}.material`, pk.material, { options: optionsFrom(f.materials, pk.material, materialLabel) }),
+        field('Mass (g)', `packaging.${i}.massG`, pk.massG, { type: 'number', step: 'any', min: 0 }),
+        removeButton('packaging', i, pk.name || 'packaging'),
+      ]));
+
+    const legs = p.transport.map((t, i) =>
+      el('div', { className: 'item-row leg' }, [
+        field('Mode', `transport.${i}.mode`, t.mode, { options: optionsFrom(f.transport, t.mode, (v) => `${v.name} (${v.factor} kg/t·km)`) }),
+        field('Distance (km)', `transport.${i}.km`, t.km, { type: 'number', step: 'any', min: 0 }),
+        removeButton('transport', i, 'transport leg'),
+      ]));
+
+    const form = $('#editor');
+    form.replaceChildren(
+      el('div', { className: 'grid-2' }, [
+        field('Product name', 'name', p.name),
+        field('Functional unit', 'functionalUnit', p.functionalUnit),
+        field('Manufacturing country', 'country', p.country, { options: optionsFrom(f.grid, p.country, (v) => `${v.name} (${v.factor} kg/kWh)`) }),
+        field('Sterilisation', 'sterilization', p.sterilization, { options: optionsFrom(f.sterilization, p.sterilization) }),
+        field('Product end of life', 'endOfLife', p.endOfLife, { options: optionsFrom(f.endOfLife, p.endOfLife) }),
+        field('Packaging end of life', 'packagingEndOfLife', p.packagingEndOfLife || p.endOfLife, { options: optionsFrom(f.endOfLife, p.packagingEndOfLife || p.endOfLife) }),
+      ]),
+      el('h3', { text: 'Materials (bill of materials)' }),
+      el('div', { className: 'rows' }, [
+        ...components,
+        addButton('+ Add material', () => {
+          p.components.push({ name: 'New part', material: 'polypropylene', massG: 1, process: 'injection_molding' });
+          renderEditor();
+          estimate();
+        }),
+      ]),
+      el('h3', { text: 'Packaging per unit' }),
+      el('div', { className: 'rows' }, [
+        ...packaging,
+        addButton('+ Add packaging', () => {
+          p.packaging.push({ name: 'Packaging', material: 'cardboard', massG: 1 });
+          renderEditor();
+          estimate();
+        }),
+      ]),
+      el('h3', { text: 'Transport to hospital' }),
+      el('div', { className: 'rows' }, [
+        ...legs,
+        addButton('+ Add transport leg', () => {
+          p.transport.push({ mode: 'road', km: 100 });
+          renderEditor();
+          estimate();
+        }),
+      ]),
+      el('h3', { text: 'Use phase' }),
+      el('div', { className: 'grid-2' }, [
+        field('Number of uses (1 = single-use)', 'use.uses', p.use.uses, { type: 'number', step: 1, min: 1 }),
+        field('Reprocessing per use (kg CO₂e)', 'use.reprocessingKgPerUse', p.use.reprocessingKgPerUse, { type: 'number', step: 'any', min: 0 }),
+        field('Energy per use (kWh)', 'use.energyKwhPerUse', p.use.energyKwhPerUse, { type: 'number', step: 'any', min: 0 }),
+        field('Country of use', 'use.country', p.use.country, { options: optionsFrom(f.grid, p.use.country) }),
+      ]),
+    );
+  }
+
+  $('#editor').addEventListener('input', (e) => {
+    const target = e.target;
+    const path = target.dataset.path;
+    if (!path || !state.product) return;
+    let value = target.value;
+    if (target.dataset.number) {
+      value = target.value === '' ? NaN : Number(target.value);
+      const ok = Number.isFinite(value) && value >= 0;
+      target.setAttribute('aria-invalid', ok ? 'false' : 'true');
+      if (!ok) return;
+    }
+    setPath(path, value);
+    scheduleEstimate();
+  });
+
+  // ---------- estimate & results ----------
+
+  async function estimate() {
+    if (!state.product) return;
+    const seq = (state.estimateSeq += 1);
+    try {
+      const result = await api('/api/estimate', {
+        method: 'POST',
+        body: JSON.stringify({ product: state.product, quantity: state.quantity }),
+      });
+      if (seq !== state.estimateSeq) return; // a newer request superseded this one
+      state.result = result;
+      renderResults();
+      if ($('#status').classList.contains('error')) setStatus('');
+    } catch (err) {
+      if (seq !== state.estimateSeq) return;
+      setStatus(err.details ? `Please check: ${err.details.join('; ')}` : err.message, true);
+    }
+  }
+  const scheduleEstimate = debounce(estimate, 250);
+
+  function barChart(rows, { highlightTop = true, ariaLabel }) {
+    const max = Math.max(...rows.map((r) => r.value), 0);
+    const top = rows.reduce((a, b) => (b.value > a.value ? b : a), rows[0]);
+    return el('div', { className: 'bars', role: 'list', 'aria-label': ariaLabel }, rows.map((r) => {
+      const bar = el('div', { className: 'bar' });
+      bar.style.width = max > 0 ? `${(r.value / max) * 100}%` : '0';
+      const row = el('div', {
+        className: `bar-row${highlightTop && r === top && r.value > 0 ? ' top' : ''}${r.className ? ` ${r.className}` : ''}`,
+        role: 'listitem',
+        tabindex: 0,
+        'aria-label': `${r.label}: ${r.valueText}`,
+      }, [
+        el('span', { className: 'bar-label', text: r.label }),
+        el('div', { className: 'bar-track' }, bar),
+        el('span', { className: 'bar-value', text: r.valueText }),
+      ]);
+      attachTooltip(row, () => r.tooltip);
+      return row;
+    }));
+  }
+
+  function renderResults() {
+    const r = state.result;
+    const per = fmtCO2(r.perUseKgCO2e);
+    const unitText = r.reusable ? `per use (${r.uses.toLocaleString()} uses per item)` : `per ${r.functionalUnit}`;
+    const qtyLine = state.quantity !== 1
+      ? `${state.quantity.toLocaleString()} ${r.reusable ? 'uses' : 'units'}: ${fmtText(r.quantityKgCO2e)} (range ${fmtText(r.uncertainty.low)} – ${fmtText(r.uncertainty.high)})`
+      : `Range ${fmtText(r.uncertainty.low)} – ${fmtText(r.uncertainty.high)} (${r.uncertainty.note})`;
+    const lifetime = r.reusable ? ` · whole item over its life: ${fmtText(r.lifetimeKgCO2e)}` : '';
+
+    const stageRows = r.stages.map((s) => ({
+      label: s.label,
+      value: s.kgCO2e,
+      valueText: fmtText(s.kgCO2e),
+      tooltip: `${s.label}: ${fmtText(s.kgCO2e)} — ${pct(s.share)} of total`,
+    }));
+
+    const stageTable = el('div', { className: 'table-scroll', hidden: true }, el('table', {}, [
+      el('thead', {}, el('tr', {}, [el('th', { text: 'Stage' }), el('th', { className: 'num', text: 'kg CO₂e' }), el('th', { className: 'num', text: 'Share' })])),
+      el('tbody', {}, r.stages.map((s) => el('tr', {}, [
+        el('td', { text: s.label }),
+        el('td', { className: 'num', text: sig(s.kgCO2e, 4) }),
+        el('td', { className: 'num', text: pct(s.share) }),
+      ]))),
+    ]));
+    const chart = barChart(stageRows, { ariaLabel: 'Footprint by life-cycle stage' });
+    const toggle = el('button', {
+      type: 'button',
+      className: 'ghost small-btn',
+      'aria-pressed': 'false',
+      onclick: () => {
+        const showTable = stageTable.hidden;
+        stageTable.hidden = !showTable;
+        chart.hidden = showTable;
+        toggle.textContent = showTable ? 'Show chart' : 'Show table';
+        toggle.setAttribute('aria-pressed', String(showTable));
+      },
+    }, 'Show table');
+
+    const componentTable = el('div', { className: 'table-scroll' }, el('table', {}, [
+      el('thead', {}, el('tr', {}, [
+        el('th', { text: 'Part' }), el('th', { text: 'Material' }), el('th', { className: 'num', text: 'Mass (g)' }),
+        el('th', { className: 'num', text: 'Material + mfg + disposal' }),
+      ])),
+      el('tbody', {}, r.components.map((c) => el('tr', {}, [
+        el('td', { text: c.name }),
+        el('td', { text: c.materialName }),
+        el('td', { className: 'num', text: sig(c.massG) }),
+        el('td', { className: 'num', text: fmtText(c.kgCO2e.total) }),
+      ]))),
+    ]));
+
+    $('#results').replaceChildren(
+      el('div', { className: 'hero' }, [
+        el('span', { className: 'hero-value', text: per.value }),
+        el('span', { className: 'hero-unit', text: `${per.unit} ${unitText}` }),
+        el('span', { className: 'hero-sub', text: `${r.name}. ${qtyLine}${lifetime}` }),
+        el('span', { className: 'hero-sub', text: `Biggest contributor: ${r.hotspot.label} (${pct(r.hotspot.share)}). Product mass ${sig(r.massG.product)} g + packaging ${sig(r.massG.packaging)} g.` }),
+      ]),
+      el('div', { className: 'equivalents', 'aria-label': `Equivalent to, for ${state.quantity.toLocaleString()} unit(s)` },
+        r.equivalents.map((e) => el('div', { className: 'tile' }, [
+          el('div', { className: 'tile-value', text: sig(e.value) }),
+          el('div', { className: 'tile-label', text: e.label }),
+        ]))),
+      el('div', { className: 'chart-head' }, [el('h3', { text: 'By life-cycle stage' }), toggle]),
+      chart,
+      stageTable,
+      el('h3', { text: 'Hotspots by part' }),
+      componentTable,
+      el('h3', { text: 'How to reduce it' }),
+      el('ul', { className: 'tips' }, r.recommendations.map((t) => el('li', { text: t }))),
+      el('div', { className: 'actions' }, [
+        el('button', { type: 'button', className: 'primary', onclick: addToCompare }, 'Add to comparison'),
+        el('button', { type: 'button', className: 'ghost', onclick: downloadCsv }, COPY_EXPORT ? 'Copy CSV' : 'Download CSV'),
+        el('button', { type: 'button', className: 'ghost', onclick: downloadJson }, COPY_EXPORT ? 'Copy JSON' : 'Download JSON'),
+      ]),
+    );
+  }
+
+  // ---------- comparison ----------
+
+  let compareItems = storage.get(COMPARE_KEY, []);
+  if (!Array.isArray(compareItems)) compareItems = [];
+
+  function addToCompare() {
+    const r = state.result;
+    if (!r) return;
+    compareItems = compareItems.filter((c) => c.name !== r.name);
+    compareItems.push({
+      name: r.name,
+      unit: r.reusable ? 'per use' : `per ${r.functionalUnit}`,
+      perUseKgCO2e: r.perUseKgCO2e,
+    });
+    compareItems = compareItems.slice(-MAX_COMPARE);
+    storage.set(COMPARE_KEY, compareItems);
+    renderCompare();
+    setStatus(`Added “${r.name}” to the comparison.`);
+  }
+
+  function renderCompare() {
+    const section = $('#compare');
+    section.hidden = compareItems.length === 0;
+    if (!compareItems.length) return;
+    const sorted = [...compareItems].sort((a, b) => b.perUseKgCO2e - a.perUseKgCO2e);
+    const chart = barChart(sorted.map((c) => ({
+      label: `${c.name} (${c.unit})`,
+      value: c.perUseKgCO2e,
+      valueText: fmtText(c.perUseKgCO2e),
+      tooltip: `${c.name}: ${fmtText(c.perUseKgCO2e)} ${c.unit}`,
+      className: 'compare-row',
+    })), { highlightTop: false, ariaLabel: 'Saved products compared' });
+    const removeList = el('div', { className: 'examples' }, sorted.map((c) =>
+      el('button', {
+        type: 'button',
+        className: 'chip',
+        'aria-label': `Remove ${c.name} from comparison`,
+        onclick: () => {
+          compareItems = compareItems.filter((x) => x.name !== c.name);
+          storage.set(COMPARE_KEY, compareItems);
+          renderCompare();
+        },
+      }, `× ${c.name}`)));
+    $('#compare-chart').replaceChildren(chart, removeList);
+  }
+
+  $('#compare-clear').addEventListener('click', () => {
+    compareItems = [];
+    storage.set(COMPARE_KEY, compareItems);
+    renderCompare();
+  });
+
+  // ---------- export ----------
+
+  // Some hosts (sandboxed embeds) block file downloads; there we copy instead.
+  async function copyText(label, content) {
+    try {
+      await navigator.clipboard.writeText(content);
+      setStatus(`${label} copied to the clipboard.`);
+    } catch {
+      setStatus(`Could not copy ${label} automatically. Your browser blocked clipboard access.`, true);
+    }
+  }
+
+  function download(filename, content, type) {
+    if (COPY_EXPORT) {
+      copyText(type === 'text/csv' ? 'CSV' : 'JSON', content);
+      return;
+    }
+    const url = URL.createObjectURL(new Blob([content], { type }));
+    const a = el('a', { href: url, download: filename });
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'product';
+  const csvCell = (v) => {
+    let s = String(v);
+    if (/^[=+\-@]/.test(s)) s = `'${s}`; // neutralise spreadsheet formulas
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+
+  function downloadCsv() {
+    const r = state.result;
+    const rows = [
+      ['Product', r.name],
+      ['Functional unit', r.reusable ? `1 use of ${r.uses}` : r.functionalUnit],
+      ['Footprint per unit/use (kg CO2e)', r.perUseKgCO2e],
+      ['Quantity', r.quantity],
+      ['Footprint for quantity (kg CO2e)', r.quantityKgCO2e],
+      [],
+      ['Stage', 'kg CO2e per unit/use', 'Share'],
+      ...r.stages.map((s) => [s.label, s.kgCO2e, s.share]),
+      [],
+      ['Part', 'Material', 'Mass (g)', 'Material kg CO2e', 'Manufacturing kg CO2e', 'End of life kg CO2e'],
+      ...r.components.map((c) => [c.name, c.materialName, c.massG, c.kgCO2e.material, c.kgCO2e.manufacturing, c.kgCO2e.endOfLife]),
+    ];
+    download(`${slug(r.name)}-carbon-footprint.csv`, rows.map((row) => row.map(csvCell).join(',')).join('\n'), 'text/csv');
+  }
+
+  function downloadJson() {
+    const payload = { product: state.product, quantity: state.quantity, result: state.result };
+    download(`${slug(state.result.name)}-carbon-footprint.json`, JSON.stringify(payload, null, 2), 'application/json');
+  }
+
+  // ---------- theme ----------
+
+  function applyTheme(theme) {
+    if (theme) document.documentElement.dataset.theme = theme;
+  }
+  applyTheme(storage.get(THEME_KEY, null));
+  $('#theme-toggle').addEventListener('click', () => {
+    const current = document.documentElement.dataset.theme
+      || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const next = current === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    storage.set(THEME_KEY, next);
+  });
+
+  // ---------- boot ----------
+
+  const factorsReady = api('/api/factors')
+    .then((factors) => { state.factors = factors; })
+    .catch((err) => setStatus(`Could not load emission factors: ${err.message}`, true));
+  renderCompare();
+  // Open on a worked example so the first view shows what the tool does.
+  input.value = 'latex glove';
+  loadProduct('latex-exam-glove')
+    .then(() => setStatus('Showing an example: one latex examination glove. Type any medical product above to estimate it.'))
+    .catch(() => {});
+})();
+
+</script>
+</body>
+</html>

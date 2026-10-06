@@ -4,9 +4,7 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const factors = require('./src/data/factors');
-const { calculateFootprint, ValidationError } = require('./src/engine/calculator');
-const { searchProducts, findProductById, draftProduct } = require('./src/engine/search');
+const { route } = require('./src/routes');
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const MAX_BODY_BYTES = 100 * 1024;
@@ -54,66 +52,6 @@ function readJsonBody(req) {
   });
 }
 
-function summary(product, score) {
-  return {
-    id: product.id,
-    name: product.name,
-    category: product.category,
-    functionalUnit: product.functionalUnit,
-    score,
-  };
-}
-
-function factorTables() {
-  const pick = (table, fields) =>
-    Object.fromEntries(Object.entries(table).map(([k, v]) => [k, Object.fromEntries(fields.map((f) => [f, v[f]]))]));
-  return {
-    materials: pick(factors.MATERIALS, ['name', 'factor', 'eol']),
-    processes: pick(factors.PROCESSES, ['name', 'kwhPerKg']),
-    grid: pick(factors.GRID, ['name', 'factor']),
-    sterilization: pick(factors.STERILIZATION, ['name', 'factor']),
-    transport: pick(factors.TRANSPORT, ['name', 'factor']),
-    endOfLife: pick(factors.END_OF_LIFE, ['name']),
-  };
-}
-
-async function handleApi(req, res, url) {
-  const { pathname } = url;
-
-  if (req.method === 'GET' && pathname === '/api/products') {
-    const q = url.searchParams.get('q') || '';
-    const results = searchProducts(q.slice(0, 200));
-    return sendJson(res, 200, { query: q, results: results.map((r) => summary(r.product, r.score)) });
-  }
-
-  const productMatch = pathname.match(/^\/api\/products\/([a-z0-9-]+)$/);
-  if (req.method === 'GET' && productMatch) {
-    const product = findProductById(productMatch[1]);
-    if (!product) return sendJson(res, 404, { error: 'Product not found' });
-    return sendJson(res, 200, product);
-  }
-
-  if (req.method === 'GET' && pathname === '/api/factors') {
-    return sendJson(res, 200, factorTables());
-  }
-
-  if (req.method === 'POST' && pathname === '/api/draft') {
-    const body = await readJsonBody(req);
-    if (typeof body.name !== 'string' || !body.name.trim()) {
-      return sendJson(res, 400, { error: 'name is required' });
-    }
-    return sendJson(res, 200, draftProduct(body.name));
-  }
-
-  if (req.method === 'POST' && pathname === '/api/estimate') {
-    const body = await readJsonBody(req);
-    const quantity = body.quantity === undefined ? 1 : body.quantity;
-    return sendJson(res, 200, calculateFootprint(body.product, quantity));
-  }
-
-  return sendJson(res, 404, { error: 'Not found' });
-}
-
 function serveStatic(req, res, url) {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.writeHead(405, SECURITY_HEADERS);
@@ -154,10 +92,9 @@ function createServer() {
     }
     if (!url.pathname.startsWith('/api/')) return serveStatic(req, res, url);
     try {
-      return await handleApi(req, res, url);
+      const { status, body } = await route(req.method, url.pathname, url.searchParams, () => readJsonBody(req));
+      return sendJson(res, status, body);
     } catch (err) {
-      if (err instanceof ValidationError) return sendJson(res, 422, { error: 'Invalid product', details: err.errors });
-      if (err.status) return sendJson(res, err.status, { error: err.message });
       console.error(err);
       return sendJson(res, 500, { error: 'Internal server error' });
     }
